@@ -4,6 +4,10 @@
 # 4. Используйте композицию для создания класса `Zoo`, который будет содержать информацию о животных и сотрудниках. Должны быть методы для добавления животных и сотрудников в зоопарк.
 # 5. Создайте классы для сотрудников, например, `ZooKeeper`, `Veterinarian`, которые могут иметь специфические методы (например, `feed_animal()` для `ZooKeeper` и `heal_animal()` для `Veterinarian`).
 
+# Дополнительно:
+# Попробуйте добавить дополнительные функции в вашу программу, такие как сохранение информации о зоопарке в файл и возможность её загрузки, чтобы у вашего зоопарка было "постоянное состояние" между запусками программы.
+
+
 import json
 
 class Animal():
@@ -17,12 +21,24 @@ class Animal():
     def eat(self):
         print (f"{self.name} ест")
 
+    def to_dict(self):
+        return {
+            "type": self.__class__.__name__,
+            "name": self.name,
+            "age": self.age
+        }
+
 class Bird(Animal):
     def __init__(self, name, age, color_wings):
         super().__init__(name, age)
         self.color_wings = color_wings
     def make_sound(self):
         print(f'{self.name} говорит "Чи-чи-пи"')
+
+    def to_dict(self):
+        data = super().to_dict()
+        data["color_wings"] = self.color_wings
+        return data
 
 class Mammal(Animal):
     def __init__(self,name, age, lenght_mane):
@@ -31,12 +47,23 @@ class Mammal(Animal):
     def make_sound(self):
         print(f'{self.name} говорит "Аррр"')
 
+    def to_dict(self):
+        data = super().to_dict()
+        data["lenght_mane"] = self.lenght_mane
+        return data
+
 class Reptile(Animal):
     def __init__(self, name, age, body_lenght):
         super().__init__(name, age)
         self.body_lenght = body_lenght
     def make_sound(self):
         print(f'{self.name} говорит "Тссс"')
+
+    def to_dict(self):
+        data = super().to_dict()
+        data["body_lenght"] = self.body_lenght
+        return data
+
 
 def animal_sound(animals):
     for animal in animals:
@@ -56,9 +83,24 @@ class Zoo():
         self.employees[employee.name] = employee
         print(f"{employee.name} устроился на работу в зоопарк")
 
+    def save_to_file(self, filename):
+        data = {
+            "animals": [animal.to_dict() for animal in self.animals.values()],
+            "employees": [employee.to_dict() for employee in self.employees.values()]
+        }
+        with open(filename, 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+        print(f"Данные сохранены в файле {filename}")
+
 class ZooKeeper():
     def __init__(self,name):
         self.name = name
+
+    def to_dict(self):
+        return {
+            "type": "ZooKeeper",
+            "name": self.name
+        }
     def feed_animal(self, animal):
         print(f"{self.name} кормит {animal.name}")
         animal.eat()
@@ -66,6 +108,12 @@ class ZooKeeper():
 class Veterinarian():
     def __init__(self,name):
         self.name = name
+
+    def to_dict(self):
+        return {
+            "type": "Veterinarian",
+            "name": self.name
+        }
     def heal_animal(self, animal):
         print(f"{self.name} лечит {animal.name}")
         animal.make_sound()
@@ -82,7 +130,7 @@ zoo.add_animal(Reptile("Змея", 2, "короткий"))
 zoo.add_employee(keeper)
 zoo.add_employee(veterinarian)
 
-
+zoo.save_to_file("zoo_data.json")
 
 keeper.feed_animal(zoo.animals['Воробей'])
 veterinarian.heal_animal(zoo.animals['Змея'])
