@@ -10,13 +10,13 @@
             "type": "Mammal",
             "name": "Лев",
             "age": 5,
-            "lenght_mane": "Длинная"
+            "length_mane": "Длинная"
         },
         {
             "type": "Reptile",
             "name": "Змея",
             "age": 2,
-            "body_lenght": "короткий"
+            "body_length": "короткий"
         }
     ],
     "employees": [

@@ -32,6 +32,7 @@ class Bird(Animal):
     def __init__(self, name, age, color_wings):
         super().__init__(name, age)
         self.color_wings = color_wings
+
     def make_sound(self):
         print(f'{self.name} говорит "Чи-чи-пи"')
 
@@ -41,29 +42,30 @@ class Bird(Animal):
         return data
 
 class Mammal(Animal):
-    def __init__(self,name, age, lenght_mane):
+    def __init__(self,name, age, length_mane):
         super().__init__(name, age)
-        self.lenght_mane = lenght_mane
+        self.length_mane = length_mane
+
     def make_sound(self):
         print(f'{self.name} говорит "Аррр"')
 
     def to_dict(self):
         data = super().to_dict()
-        data["lenght_mane"] = self.lenght_mane
+        data["length_mane"] = self.length_mane
         return data
 
 class Reptile(Animal):
-    def __init__(self, name, age, body_lenght):
+    def __init__(self, name, age, body_length):
         super().__init__(name, age)
-        self.body_lenght = body_lenght
+        self.body_length = body_length
+
     def make_sound(self):
         print(f'{self.name} говорит "Тссс"')
 
     def to_dict(self):
         data = super().to_dict()
-        data["body_lenght"] = self.body_lenght
+        data["body_length"] = self.body_length
         return data
-
 
 def animal_sound(animals):
     for animal in animals:
@@ -91,6 +93,52 @@ class Zoo():
         with open(filename, 'w', encoding='utf-8') as file:
             json.dump(data, file, ensure_ascii=False, indent=4)
         print(f"Данные сохранены в файле {filename}")
+
+    def load_from_file(self, filename):
+        try:
+            with open(filename, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+                for animal_data in data.get("animals", []):
+                    self._load_animal_from_dict(animal_data)
+                for emp_data in data.get("employees", []):
+                    self._load_employee_from_dict(emp_data)
+            print(f"Данные загружены из файла {filename}")
+        except FileNotFoundError:
+            print(f"Файл {filename} не найден")
+
+    def _load_animal_from_dict(self, data):
+        animal_type = data.get("type")
+        name = data.get("name")
+        age = data.get("age")
+
+        if animal_type == "Bird":
+            color_wings = data.get("color_wings", "неизвестный")
+            animal = Bird(name, age, color_wings)
+        elif animal_type == "Mammal":
+            length_mane = data.get("length_mane", "неизвестная")
+            animal = Mammal(name, age, length_mane)
+        elif animal_type == "Reptile":
+            body_length = data.get("body_length", "неизвестная")
+            animal = Reptile(name, age, body_length)
+        else:
+            print(f"Неизвестный тип животного: {animal_type}")
+            return
+
+        self.add_animal(animal)
+
+    def _load_employee_from_dict(self, data):
+        emp_type = data.get("type")
+        name = data.get("name")
+
+        if emp_type == "ZooKeeper":
+            employee = ZooKeeper(name)
+        elif emp_type == "Veterinarian":
+            employee = Veterinarian(name)
+        else:
+            print(f"Неизвестный тип сотрудника: {emp_type}")
+            return
+
+        self.add_employee(employee)
 
 class ZooKeeper():
     def __init__(self,name):
@@ -130,7 +178,9 @@ zoo.add_animal(Reptile("Змея", 2, "короткий"))
 zoo.add_employee(keeper)
 zoo.add_employee(veterinarian)
 
+
 zoo.save_to_file("zoo_data.json")
+# zoo.load_from_file("zoo_data.json")
 
 keeper.feed_animal(zoo.animals['Воробей'])
 veterinarian.heal_animal(zoo.animals['Змея'])
